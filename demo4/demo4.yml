@@ -1,0 +1,41 @@
+# 4. Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-3-app
+  namespace: demo-3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-3-app
+  template:
+    metadata:
+      labels:
+        app: demo-3-app
+      annotations:
+        # Enjeksiyonu aktif et
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "demo-app-role"
+        
+        # TLS Ayarları (Injector bu secret'ı otomatik /vault/tls altına bağlar)
+        vault.hashicorp.com/tls-secret: "vault-tls-ca"
+        vault.hashicorp.com/ca-cert: "/vault/tls/ca.crt"
+        
+        # Secret Çekme (Daha önce oluşturduğumuz payment-api'yi kullanalım)
+        vault.hashicorp.com/agent-inject-secret-order-conf.json: "secret/data/payment-api"
+        
+        # Template (JSON formatı)
+        vault.hashicorp.com/agent-inject-template-order-conf.json: |
+          {
+            {{- with secret "secret/data/payment-api" -}}
+            "order_api_key": "{{ .Data.data.api_key }}",
+            "mode": "namespace-demo-2"
+            {{- end -}}
+          }
+    spec:
+      serviceAccountName: demo-3-sa
+      containers:
+        - name: main-app
+          image: alpine
+          command: ["sh", "-c", "while true; do sleep 3600; done"]
