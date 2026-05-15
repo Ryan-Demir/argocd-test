@@ -2,17 +2,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: demo-3-app
-  namespace: demo-3
+  name: demo-4-app
+  namespace: demo-4
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: demo-3-app
+      app: demo-4-app
   template:
     metadata:
       labels:
-        app: demo-3-app
+        app: demo-4-app
       annotations:
         # Enjeksiyonu aktif et
         vault.hashicorp.com/agent-inject: "true"
@@ -34,8 +34,8 @@ spec:
             {{- end -}}
           }
     spec:
-      serviceAccountName: demo-3-sa
+      serviceAccountName: demo-4-sa
       containers:
         - name: main-app
           image: alpine
-          command: ["sh", "-c", "while true; do sleep 3600; done"]
+          command: ["sh", "-c", "while true; do sleep 4600; done"]
